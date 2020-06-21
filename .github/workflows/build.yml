@@ -1,0 +1,136 @@
+name: Build
+
+on: create
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-winpthreads:
+    name: Build winpthreads
+    runs-on: windows-latest
+    steps:
+      - name: Fetch winpthreads source
+        uses: actions/checkout@v2
+        with:
+          repository: Bakhazard/winpthreads-msvc
+          path: winpthreads
+      - name: Build winpthreads
+        run: | 
+          mkdir -p $GITHUB_WORKSPACE/dist/winpthreads/{lib,include}
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_INSTALL_PREFIX=${GITHUB_WORKSPACE}/winpthreads -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release
+          cp Release/winpthreads.lib "$GITHUB_WORKSPACE/dist/winpthreads/lib"
+          cp -R ../include/* "$GITHUB_WORKSPACE/dist/winpthreads/include"
+        working-directory: winpthreads
+        shell: bash
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: winpthreads
+          path: ${{ github.workspace }}/dist/winpthreads
+
+  build-cbc:
+    name: Build cbc
+    needs: build-winpthreads
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
+    strategy:
+      matrix:
+        platform: [osx, linux, musl, wasm, win64]
+        include:
+          - platform: osx
+            os: macos-latest
+          - platform: linux
+            os: ubuntu-latest
+          - platform: musl
+            os: ubuntu-latest
+            container: dekker1/minibuild:alpine
+          - platform: wasm
+            container: trzeci/emscripten
+            os: ubuntu-latest
+          - platform: win64
+            os: windows-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Setup Windows build environment
+        if: matrix.platform == 'win64'
+        uses: cyderize/msvc-msys2@v1
+        with:
+          shell-name: coin-bash
+      - name: Checkout coinbrew script
+        uses: actions/checkout@v2
+        with:
+          repository: coin-or/coinbrew
+          path: coinbrew
+      - name: Prepare build environment
+        run: ./prepare.sh
+        env:
+          CBC_PLATFORM: ${{ matrix.platform }}
+        working-directory: scripts
+      - name: Fetch winpthreads build
+        if: matrix.platform == 'win64'
+        uses: actions/download-artifact@v2
+        with:
+          name: winpthreads
+          path: ${{ github.workspace }}
+      - name: Build CBC
+        run: |
+          ./coinbrew/coinbrew fetch Cbc@$CBC_VERSION --no-third-party
+          ./coinbrew/coinbrew build Cbc $CBC_CONFIG_OPTS
+        shell: coin-bash -eo pipefail {0}
+      - name: Add winpthreads to CBC lib
+        if: matrix.platform == 'win64'
+        run: |
+          libcbc="${GITHUB_WORKSPACE}/dist/cbc-*/cbc/lib/libCbc.a"
+          LIB.EXE /OUT:${libcbc} ${GITHUB_WORKSPACE}/winpthreads/lib/winpthreads.lib ${libcbc}
+      - name: Add licenses
+        run: |
+          cp ./LICENSE-cbc ./dist/cbc-*
+          if [[ "$RUNNER_OS" == "Windows"]]; then
+            cp ./LICENSE-winpthreads ./dist/cbc-*
+          fi
+        shell: bash
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: cbc
+          path: ${{ github.workspace }}/dist/*
+
+  release:
+    name: Create release
+    needs: [build-cbc]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: cbc
+          path: artifacts
+      - name: Package artifacts
+        run: |
+          mkdir -p "${GITHUB_WORKSPACE}/package"  
+          for d in *
+          do
+            cd "$d"
+            tar -czvf "${GITHUB_WORKSPACE}/package/${d}.tar.gz" cbc
+            cd -
+          done
+        working-directory: artifacts/cbc
+      - name: Create release
+        run: |
+          set -x
+          assets=()
+          for asset in ${GITHUB_WORKSPACE}/package/*.tar.gz
+          do
+            assets+=("-a" "$asset")
+          done
+          hub release create "${assets[@]}" -m "CBC ${GITHUB_REF}" "${GITHUB_REF}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

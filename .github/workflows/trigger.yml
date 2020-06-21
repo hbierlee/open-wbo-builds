@@ -1,0 +1,38 @@
+name: Trigger
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  repository_dispatch:
+
+jobs:
+  trigger:
+    name: Trigger builds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH access
+        uses: webfactory/ssh-agent@v0.3.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Setup git access to allow triggering build workflow
+        run: |
+          git config --global url."git@github.com:".insteadOf "https://github.com/"
+          git config --global user.email "<>"
+          git config --global user.name "Automatic Build"
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Tag new cbc release if necessary
+        run: |
+          version=$(git ls-remote --tags https://github.com/coin-or/Cbc | fgrep releases | cut -d '/' -f 4 | sort -nr -t. -k1,1 -k2,2 -k3,3 | head -1)
+          if [[ $(git tag -l "releases/$version") ]]; then
+            echo "Already built version $version"
+          else
+            echo "Need to build version $version"
+            git tag -a "releases/$version" -m "Cbc version $version (stable)"
+            git push origin -f "releases/$version"
+          fi
+      - name: Tag nightly cbc build
+        run: |
+          night=$(date +'%Y-%m-%d')
+          git tag -a "nightly/$night" -m "Cbc nightly ($night)"
+          git push -f origin "nightly/$night"
