@@ -15,17 +15,17 @@ if [[ "$CBC_PLATFORM" == "osx" ]]; then
     brew update  
     brew install bash dos2unix pkg-config
     ln -s /usr/local/bin/bash /usr/local/bin/coin-bash
-    config_opts+=" --enable-parallel --tests none"
+    config_opts+=" --enable-cbc-parallel --tests none"
 elif [[ "$CBC_PLATFORM" == "linux" ]]; then
     sudo apt-get update
     sudo apt-get -y install dos2unix
     sudo ln -s /bin/bash /usr/local/bin/coin-bash
-    config_opts+=" --enable-parallel"
+    config_opts+=" --enable-cbc-parallel"
 elif [[ "$CBC_PLATFORM" == "musl" ]]; then
     apt-get update
     apt-get -y install dos2unix pkg-config
     ln -s /bin/bash /usr/local/bin/coin-bash
-    config_opts+=" --enable-parallel"
+    config_opts+=" --enable-cbc-parallel"
 elif [[ "$CBC_PLATFORM" == "wasm" ]]; then
     apt-get update
     apt-get -y install dos2unix pkg-config
@@ -34,7 +34,7 @@ elif [[ "$CBC_PLATFORM" == "wasm" ]]; then
 elif [[ "$CBC_PLATFORM" == "win64" ]]; then
     coin-bash.bat -c "pacman -S --noconfirm git subversion wget dos2unix pkg-config make"
     workspace="$(coin-bash.bat -c 'cygpath ${GITHUB_WORKSPACE}')"
-    config_opts+=" --enable-parallel \
+    config_opts+=" --enable-cbc-parallel \
         --with-pthreadsw32-lflags=-l${workspace}/winpthreads/lib/winpthreads.lib \
         --with-pthreadsw32-cflags=-I${workspace}/winpthreads/include \
         --enable-msvc \
