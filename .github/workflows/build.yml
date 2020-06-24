@@ -89,7 +89,10 @@ jobs:
       - name: Add winpthreads to CBC lib
         if: matrix.platform == 'win64'
         run: |
-          LIB.EXE /OUT:${CBC_INSTALL_DIR}/lib/libCbc.lib ${GITHUB_WORKSPACE}/winpthreads/lib/winpthreads.lib ${CBC_INSTALL_DIR}/lib/libCbc.lib
+          lib /OUT:${CBC_INSTALL_DIR}/lib/libCbc.lib \
+            ${GITHUB_WORKSPACE}/winpthreads/lib/winpthreads.lib \
+            ${CBC_INSTALL_DIR}/lib/libCbc.lib
+        shell: coin-bash -eo pipefail {0}
       - name: Add licenses
         run: |
           cp ./LICENSE-cbc ./dist/cbc-*
