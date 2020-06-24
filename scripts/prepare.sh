@@ -44,7 +44,7 @@ else
     exit 1
 fi
 
-build_type=$(dirname "$GITHUB_REF")
+build_type=$(basename $(dirname "$GITHUB_REF"))
 build_version=$(basename "$GITHUB_REF")
 if [[ "$build_type" == "releases" ]]; then
     version=$build_version

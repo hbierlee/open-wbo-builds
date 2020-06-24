@@ -93,7 +93,7 @@ jobs:
       - name: Add licenses
         run: |
           cp ./LICENSE-cbc ./dist/cbc-*
-          if [[ "$RUNNER_OS" == "Windows"]]; then
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
             cp ./LICENSE-winpthreads ./dist/cbc-*
           fi
         shell: bash
@@ -128,12 +128,13 @@ jobs:
       - name: Create release
         run: |
           set -x
+          label="$(basename $(dirname ${GITHUB_REF}))/$(basename ${GITHUB_REF})"
           assets=()
           for asset in ${GITHUB_WORKSPACE}/package/*.tar.gz
           do
             assets+=("-a" "$asset")
           done
-          hub release create "${assets[@]}" -m "CBC ${GITHUB_REF}" "${GITHUB_REF}"
+          hub release create "${assets[@]}" -m "CBC ${label}" "${GITHUB_REF}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
