@@ -37,7 +37,7 @@ elif [[ "$CBC_PLATFORM" == "win64" ]]; then
         --with-pthreadsw32-lflags=-lwinpthreads \
         --with-pthreadsw32-cflags=-I${GITHUB_WORKSPACE}/winpthreads/include \
         --enable-msvc \
-        --host=x86_64-w64-mingw32 \
+        --build=x86_64-w64-mingw32 \
         --tests none"
 else
     echo "Unknown platform"
