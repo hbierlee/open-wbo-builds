@@ -78,9 +78,12 @@ jobs:
         with:
           name: winpthreads
           path: ${{ github.workspace }}
-      - name: Build CBC
+      - name: Fetch CBC
         run: |
           ./coinbrew/coinbrew fetch Cbc@$CBC_VERSION --no-third-party
+        shell: coin-bash -eo pipefail {0}
+      - name: Build CBC
+        run: |
           ./coinbrew/coinbrew build Cbc $CBC_CONFIG_OPTS
         shell: coin-bash -eo pipefail {0}
       - name: Add winpthreads to CBC lib
