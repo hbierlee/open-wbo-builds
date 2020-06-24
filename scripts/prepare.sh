@@ -56,3 +56,4 @@ config_opts+=" --prefix=${workspace}/dist/cbc-${build_type}-${build_version}-${C
 # Set environment for future steps
 echo "::set-env name=CBC_VERSION::${version}"
 echo "::set-env name=CBC_CONFIG_OPTS::${config_opts}"
+echo "::set-env name=CBC_INSTALL_DIR::${GITHUB_WORKSPACE}/dist/cbc-${build_type}-${build_version}-${CBC_PLATFORM}/cbc"
