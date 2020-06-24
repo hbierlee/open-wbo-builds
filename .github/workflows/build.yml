@@ -134,3 +134,18 @@ jobs:
           hub release create "${assets[@]}" -m "CBC ${GITHUB_REF}" "${GITHUB_REF}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  clean:
+    name: Clean Up
+    needs: [build-winpthreads, build-cbc, release]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Remove tag so due to build failure
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: |
+          git config --global user.email "<>"
+          git config --global user.name "Automatic Build"
+          git push --delete origin ${GITHUB_REF}
