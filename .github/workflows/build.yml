@@ -31,7 +31,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: winpthreads
-          path: ${{ github.workspace }}/dist/winpthreads
+          path: ${{ github.workspace }}/dist
 
   build-cbc:
     name: Build cbc
