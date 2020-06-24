@@ -17,17 +17,17 @@ if [[ "$CBC_PLATFORM" == "osx" ]]; then
     config_opts+=" --enable-parallel --tests none"
 elif [[ "$CBC_PLATFORM" == "linux" ]]; then
     sudo apt-get update
-    sudo apt-get install dos2unix
+    sudo apt-get -y install dos2unix
     sudo ln -s /bin/bash /usr/local/bin/coin-bash
     config_opts+=" --enable-parallel"
 elif [[ "$CBC_PLATFORM" == "musl" ]]; then
     apt-get update
-    apt-get install dos2unix pkg-config
+    apt-get -y install dos2unix pkg-config
     ln -s /bin/bash /usr/local/bin/coin-bash
     config_opts+=" --enable-parallel"
 elif [[ "$CBC_PLATFORM" == "wasm" ]]; then
     apt-get update
-    apt-get install dos2unix pkg-config
+    apt-get -y install dos2unix pkg-config
     ln -s /bin/bash /usr/local/bin/coin-bash
     config_opts+=" --tests none"
 elif [[ "$CBC_PLATFORM" == "win64" ]]; then
