@@ -2,7 +2,8 @@
 set -x
 
 # Base configure args
-config_opts="--parallel-jobs 2 \
+config_opts="--verbosity=4 \
+    --parallel-jobs=2 \
     --enable-static --disable-shared \
     --without-blas --without-lapack --without-mumps --disable-bzlib \
     --no-third-party \
@@ -34,7 +35,7 @@ elif [[ "$CBC_PLATFORM" == "win64" ]]; then
     coin-bash.bat -c "pacman -S --noconfirm git subversion wget dos2unix pkg-config make"
     workspace="$(coin-bash.bat -c 'cygpath ${GITHUB_WORKSPACE}')"
     config_opts+=" --enable-parallel \
-        --with-pthreadsw32-lflags=-lwinpthreads \
+        --with-pthreadsw32-lflags=\"-L${GITHUB_WORKSPACE}/winpthreads/lib -lwinpthreads\" \
         --with-pthreadsw32-cflags=-I${GITHUB_WORKSPACE}/winpthreads/include \
         --enable-msvc \
         --build=x86_64-w64-mingw32 \

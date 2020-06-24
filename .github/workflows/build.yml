@@ -127,7 +127,7 @@ jobs:
             tar -czvf "${GITHUB_WORKSPACE}/package/${d}.tar.gz" cbc
             cd -
           done
-        working-directory: artifacts/cbc
+        working-directory: artifacts
       - name: Create release
         run: |
           set -x
