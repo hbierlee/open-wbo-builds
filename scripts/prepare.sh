@@ -36,7 +36,7 @@ elif [[ "$CBC_PLATFORM" == "win64" ]]; then
     workspace="$(coin-bash.bat -c 'cygpath ${GITHUB_WORKSPACE}')"
     config_opts+=" --enable-cbc-parallel \
         --with-pthreadsw32-lflags=winpthreads.lib \
-        --with-pthreadsw32-cflags=-I${GITHUB_WORKSPACE}/winpthreads/include \
+        --with-pthreadsw32-cflags=-I${workspace}/winpthreads/include \
         --with-pthreadsw32-lib=${workspace}/winpthreads/lib/winpthreads.lib \
         --with-pthreadsw32-incdir=${workspace}/winpthreads/include \
         --enable-msvc \
