@@ -80,7 +80,11 @@ jobs:
           path: ${{ github.workspace }}
       - name: Fetch CBC
         run: |
-          ./coinbrew/coinbrew --no-prompt fetch Cbc@$CBC_VERSION --no-third-party
+          if [[ "$CBC_BUILD_TYPE" == "nightly" ]]; then
+            ./coinbrew --no-prompt fetch Cbc@master --main-proj-sha=$CBC_VERSION --no-third-party
+          else
+            ./coinbrew/coinbrew --no-prompt fetch Cbc@$CBC_VERSION --no-third-party
+          fi
         shell: coin-bash -eo pipefail {0}
       - name: Build CBC
         run: |
