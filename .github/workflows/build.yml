@@ -21,7 +21,7 @@ jobs:
           mkdir -p $GITHUB_WORKSPACE/dist/winpthreads/{lib,include}
           mkdir build
           cd build
-          cmake .. -DCMAKE_INSTALL_PREFIX=${GITHUB_WORKSPACE}/winpthreads -DCMAKE_C_FLAGS_RELEASE=-MT
+          cmake .. -DCMAKE_INSTALL_PREFIX=${GITHUB_WORKSPACE}/winpthreads
           cmake --build . --config Release
           cp Release/winpthreads.lib "$GITHUB_WORKSPACE/dist/winpthreads/lib"
           cp -R ../include/* "$GITHUB_WORKSPACE/dist/winpthreads/include"
@@ -68,6 +68,7 @@ jobs:
           repository: coin-or/coinbrew
           path: coinbrew
       - name: Prepare build environment
+        id: prepare
         run: ./prepare.sh
         env:
           CBC_PLATFORM: ${{ matrix.platform }}
@@ -93,6 +94,8 @@ jobs:
         env:
           INCLUDE: ${{ github.workspace }}/winpthreads/include
           LIB: ${{ github.workspace }}/winpthreads/lib
+          CFLAGS: ${{ steps.prepare.outputs.cflags }}
+          CXXFLAGS: ${{ steps.prepare.outputs.cflags }}
       - name: Add winpthreads to CBC lib
         if: matrix.platform == 'win64'
         run: |

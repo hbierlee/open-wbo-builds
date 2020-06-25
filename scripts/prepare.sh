@@ -42,6 +42,8 @@ elif [[ "$CBC_PLATFORM" == "win64" ]]; then
         --enable-msvc \
         --build=x86_64-w64-mingw32 \
         --tests none"
+    # Force /MD /O2 on Windows
+    echo "::set-output name=cflags::-MD -O2"
 else
     echo "Unknown platform"
     exit 1
