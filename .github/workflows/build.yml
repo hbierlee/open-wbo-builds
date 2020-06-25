@@ -134,7 +134,7 @@ jobs:
           mkdir -p "${GITHUB_WORKSPACE}/package"  
           for d in *; do
             cd "$d"
-            tar -czvf "${GITHUB_WORKSPACE}/package/${d}.tar.gz" cbc
+            tar -czvf "${GITHUB_WORKSPACE}/package/${d}.tar.gz" *
             cd -
           done
         working-directory: artifacts
