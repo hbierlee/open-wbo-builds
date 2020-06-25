@@ -81,7 +81,7 @@ jobs:
       - name: Fetch CBC
         run: |
           if [[ "$CBC_BUILD_TYPE" == "nightly" ]]; then
-            ./coinbrew --no-prompt fetch Cbc@master --main-proj-sha=$CBC_VERSION --no-third-party
+            ./coinbrew/coinbrew --no-prompt fetch Cbc@master --main-proj-sha=$CBC_VERSION --no-third-party
           else
             ./coinbrew/coinbrew --no-prompt fetch Cbc@$CBC_VERSION --no-third-party
           fi
@@ -145,8 +145,9 @@ jobs:
           label="$tag"
           flags=()
           if [[ "$CBC_BUILD_TYPE" == "nightly" ]]; then
-            flags+="-p"
+            flags+=("-p")
             label="$CBC_BUILD_TYPE/$(date +'%Y-%m-%d') ($CBC_VERSION)"
+          fi
           for asset in ${GITHUB_WORKSPACE}/package/*.tar.gz; do
             flags+=("-a" "$asset")
           done
