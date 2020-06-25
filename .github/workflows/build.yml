@@ -141,12 +141,14 @@ jobs:
       - name: Create release
         run: |
           set -x
-          tag="$CBC_BUILD_TYPE/$CBC_VERSION"
+          build_type="$(basename $(dirname ${GITHUB_REF}))"
+          build_version="$(basename ${GITHUB_REF})"
+          tag="$build_type/$build_version"
           label="$tag"
           flags=()
-          if [[ "$CBC_BUILD_TYPE" == "nightly" ]]; then
+          if [[ "$build_type" == "nightly" ]]; then
             flags+=("-p")
-            label="$CBC_BUILD_TYPE/$(date +'%Y-%m-%d') ($CBC_VERSION)"
+            label="$build_type/$(date +'%Y-%m-%d') ($build_version)"
           fi
           for asset in ${GITHUB_WORKSPACE}/package/*.tar.gz; do
             flags+=("-a" "$asset")
