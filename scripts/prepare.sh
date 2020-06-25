@@ -49,14 +49,10 @@ fi
 
 build_type=$(basename $(dirname "$GITHUB_REF"))
 build_version=$(basename "$GITHUB_REF")
-if [[ "$build_type" == "releases" ]]; then
-    version=$build_version
-else
-    version="master"
-fi
 config_opts+=" --prefix=${workspace}/dist/cbc-${build_type}-${build_version}-${CBC_PLATFORM}/cbc"
 
 # Set environment for future steps
-echo "::set-env name=CBC_VERSION::${version}"
+echo "::set-env name=CBC_BUILD_TYPE::${build_type}"
+echo "::set-env name=CBC_VERSION::${build_version}"
 echo "::set-env name=CBC_CONFIG_OPTS::${config_opts}"
 echo "::set-env name=CBC_INSTALL_DIR::${GITHUB_WORKSPACE}/dist/cbc-${build_type}-${build_version}-${CBC_PLATFORM}/cbc"

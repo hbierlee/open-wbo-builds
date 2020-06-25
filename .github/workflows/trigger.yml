@@ -31,8 +31,14 @@ jobs:
             git tag -a "releases/$version" -m "Cbc version $version (stable)"
             git push origin -f "releases/$version"
           fi
-      - name: Tag nightly cbc build
+      - name: Tag nightly cbc build if necessary
         run: |
-          night=$(date +'%Y-%m-%d')
-          git tag -a "nightly/$night" -m "Cbc nightly ($night)"
-          git push -f origin "nightly/$night"
+          sha=$(git ls-remote https://github.com/coin-or/Cbc refs/heads/master | awk '{print $1;}')
+          if [[ $(git tag -l "nightly/$sha") ]]; then
+            echo "Already built nightly $sha"
+          else
+            echo "Need to build nightly $sha"
+            night=$(date +'%Y-%m-%d')
+            git tag -a "nightly/$sha" -m "Cbc nightly ($night)"
+            git push -f origin "nightly/$sha"
+          fi
