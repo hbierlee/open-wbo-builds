@@ -138,15 +138,16 @@ jobs:
       - name: Create release
         run: |
           set -x
-          label="$(basename $(dirname ${GITHUB_REF}))/$(basename ${GITHUB_REF})"
-          assets=()
-          for asset in ${GITHUB_WORKSPACE}/package/*.tar.gz
-          do
-            assets+=("-a" "$asset")
+          build_type="$(basename $(dirname ${GITHUB_REF}))"
+          build_version="$(basename ${GITHUB_REF})"
+          label="$build_type/$build_version"
+          flags=()
+          if [[ "$build_type" == "nightly" ]]; then
+            flags+="-p"
+          for asset in ${GITHUB_WORKSPACE}/package/*.tar.gz; do
+            flags+=("-a" "$asset")
           done
-          hub release create "${assets[@]}" -m "CBC ${label}" "${GITHUB_REF}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          hub release create "${flags[@]}" -m "CBC ${label}" "${label}"
 
   clean:
     name: Clean Up
