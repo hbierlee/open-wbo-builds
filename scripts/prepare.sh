@@ -35,7 +35,7 @@ elif [[ "$CBC_PLATFORM" == "win64" ]]; then
     coin-bash.bat -c "pacman -S --noconfirm git subversion wget dos2unix pkg-config make"
     workspace="$(coin-bash.bat -c 'cygpath ${GITHUB_WORKSPACE}')"
     config_opts+=" --enable-cbc-parallel \
-        --with-pthreadsw32-lflags=${GITHUB_WORKSPACE}/winpthreads/lib/winpthreads.lib \
+        --with-pthreadsw32-lflags=winpthreads.lib \
         --with-pthreadsw32-cflags=-I${GITHUB_WORKSPACE}/winpthreads/include \
         --with-pthreadsw32-lib=${workspace}/winpthreads/lib/winpthreads.lib \
         --with-pthreadsw32-incdir=${workspace}/winpthreads/include \

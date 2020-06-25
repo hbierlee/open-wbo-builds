@@ -21,7 +21,7 @@ jobs:
           mkdir -p $GITHUB_WORKSPACE/dist/winpthreads/{lib,include}
           mkdir build
           cd build
-          cmake .. -DCMAKE_INSTALL_PREFIX=${GITHUB_WORKSPACE}/winpthreads -DCMAKE_C_FLAGS=-MT
+          cmake .. -DCMAKE_INSTALL_PREFIX=${GITHUB_WORKSPACE}/winpthreads -DCMAKE_C_FLAGS_RELEASE=-MT
           cmake --build . --config Release
           cp Release/winpthreads.lib "$GITHUB_WORKSPACE/dist/winpthreads/lib"
           cp -R ../include/* "$GITHUB_WORKSPACE/dist/winpthreads/include"
