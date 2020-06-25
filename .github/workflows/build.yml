@@ -152,6 +152,8 @@ jobs:
             flags+=("-a" "$asset")
           done
           hub release create "${flags[@]}" -m "CBC ${label}" "${tag}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   clean:
     name: Clean Up
