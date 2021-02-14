@@ -16,6 +16,7 @@ if [[ "$CBC_PLATFORM" == "osx" ]]; then
     brew install bash dos2unix pkg-config
     ln -s /usr/local/bin/bash /usr/local/bin/coin-bash
     config_opts+=" --enable-cbc-parallel --tests none"
+    echo "::set-output name=cflags::-arch x86_64 -arch arm64"
 elif [[ "$CBC_PLATFORM" == "linux" ]]; then
     sudo apt-get update
     sudo apt-get -y install dos2unix
