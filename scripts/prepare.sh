@@ -55,7 +55,7 @@ build_version=$(basename "$GITHUB_REF")
 config_opts+=" --prefix=${workspace}/dist/cbc-${build_type}-${build_version}-${CBC_PLATFORM}/cbc"
 
 # Set environment for future steps
-echo "::set-env name=CBC_BUILD_TYPE::${build_type}"
-echo "::set-env name=CBC_VERSION::${build_version}"
-echo "::set-env name=CBC_CONFIG_OPTS::${config_opts}"
-echo "::set-env name=CBC_INSTALL_DIR::${GITHUB_WORKSPACE}/dist/cbc-${build_type}-${build_version}-${CBC_PLATFORM}/cbc"
+echo "CBC_BUILD_TYPE=${build_type}" >> $GITHUB_ENV
+echo "CBC_VERSION=${build_version}" >> $GITHUB_ENV
+echo "CBC_CONFIG_OPTS=${config_opts}" >> $GITHUB_ENV
+echo "CBC_INSTALL_DIR=${GITHUB_WORKSPACE}/dist/cbc-${build_type}-${build_version}-${CBC_PLATFORM}/cbc" >> $GITHUB_ENV
