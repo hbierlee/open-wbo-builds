@@ -40,9 +40,11 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        platform: [osx, linux, musl, wasm, win64]
+        platform: [osx, osx-m1, linux, musl, wasm, win64]
         include:
           - platform: osx
+            os: macos-latest
+          - platform: osx-m1
             os: macos-latest
           - platform: linux
             os: ubuntu-latest
