@@ -1,6 +1,7 @@
 name: Build
 
-on: create
+on:
+  create:
   workflow_dispatch:
 
 
