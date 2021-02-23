@@ -21,8 +21,14 @@ jobs:
           - platform: linux
             os: ubuntu-latest
     steps:
+      - name: Setup SSH access
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Checkout repo
         uses: actions/checkout@v2
+        with:
+          repository: hbierlee/open-wbo-builds
       - name: Prepare build environment
         id: prepare
         run: sudo apt-get update
