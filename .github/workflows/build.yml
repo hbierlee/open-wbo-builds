@@ -7,172 +7,34 @@ defaults:
     shell: bash
 
 jobs:
-  build-winpthreads:
-    name: Build winpthreads
-    runs-on: windows-latest
-    steps:
-      - name: Fetch winpthreads source
-        uses: actions/checkout@v2
-        with:
-          repository: Bakhazard/winpthreads-msvc
-          path: winpthreads
-      - name: Build winpthreads
-        run: | 
-          mkdir -p $GITHUB_WORKSPACE/dist/winpthreads/{lib,include}
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_INSTALL_PREFIX=${GITHUB_WORKSPACE}/winpthreads
-          cmake --build . --config Release
-          cp Release/winpthreads.lib "$GITHUB_WORKSPACE/dist/winpthreads/lib"
-          cp -R ../include/* "$GITHUB_WORKSPACE/dist/winpthreads/include"
-        working-directory: winpthreads
-        shell: bash
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: winpthreads
-          path: ${{ github.workspace }}/dist
-
-  build-cbc:
-    name: Build cbc
-    needs: build-winpthreads
+  build-open-wbo:
+    name: Build Open-WBO
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        platform: [osx, osx-m1, linux, musl, wasm, win64]
+        platform: [linux]
         include:
-          - platform: osx
-            os: macos-latest
-          - platform: osx-m1
-            os: macos-latest
           - platform: linux
             os: ubuntu-latest
-          - platform: musl
-            os: ubuntu-latest
-            container: dekker1/minibuild:alpine
-          - platform: wasm
-            container: trzeci/emscripten
-            os: ubuntu-latest
-          - platform: win64
-            os: windows-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-      - name: Setup Windows build environment
-        if: matrix.platform == 'win64'
-        uses: cyderize/msvc-msys2@v1
-        with:
-          shell-name: coin-bash
-      - name: Checkout coinbrew script
-        uses: actions/checkout@v2
-        with:
-          repository: coin-or/coinbrew
-          path: coinbrew
       - name: Prepare build environment
         id: prepare
-        run: ./prepare.sh
+        run: sudo apt-get update
         env:
-          CBC_PLATFORM: ${{ matrix.platform }}
+          OPEN_WBO_PLATFORM: ${{ matrix.platform }}
         working-directory: scripts
-      - name: Fetch winpthreads build
-        if: matrix.platform == 'win64'
-        uses: actions/download-artifact@v2
-        with:
-          name: winpthreads
-          path: ${{ github.workspace }}
-      - name: Fetch CBC
-        run: |
-          if [[ "$CBC_BUILD_TYPE" == "nightly" ]]; then
-            ./coinbrew/coinbrew --no-prompt fetch Cbc@master --main-proj-sha=$CBC_VERSION --no-third-party
-          else
-            ./coinbrew/coinbrew --no-prompt fetch Cbc@$CBC_VERSION --no-third-party
-          fi
-        shell: coin-bash -eo pipefail {0}
-      - name: Build CBC
-        run: |
-          ./coinbrew/coinbrew --no-prompt build Cbc $CBC_CONFIG_OPTS
-        shell: coin-bash -eo pipefail {0}
-        env:
-          INCLUDE: ${{ github.workspace }}/winpthreads/include
-          LIB: ${{ github.workspace }}/winpthreads/lib
-          CFLAGS: ${{ steps.prepare.outputs.cflags }}
-          CXXFLAGS: ${{ steps.prepare.outputs.cflags }}
-      - name: Add winpthreads to CBC lib
-        if: matrix.platform == 'win64'
-        run: |
-          cbc="${CBC_INSTALL_DIR}/lib/libCbc.lib"
-          if [[ ! -f "$cbc" ]]; then
-            cbc="${CBC_INSTALL_DIR}/lib/Cbc.lib"
-          fi
-          lib /OUT:$cbc \
-            ${GITHUB_WORKSPACE}/winpthreads/lib/winpthreads.lib \
-            $cbc
-        shell: coin-bash -eo pipefail {0}
+      - name: Fetch Open-WBO
+        run: git clone git@github.com:sat-group/open-wbo.git
+      - name: Build Open-WBO
+        run: make rs
       - name: Add licenses
-        run: |
-          cp ./LICENSE-cbc ./dist/cbc-*
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            cp ./LICENSE-winpthreads ./dist/cbc-*
-          fi
-        shell: bash
+        run: cp ./LICENSE ./dist/open-wbo-*
       - name: Upload build artifact
         uses: actions/upload-artifact@v2
         with:
-          name: cbc
+          name: open-wbo_release
           path: ${{ github.workspace }}/dist/*
 
-  release:
-    name: Create release
-    needs: [build-cbc]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-      - name: Download artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: cbc
-          path: artifacts
-      - name: Package artifacts
-        run: |
-          mkdir -p "${GITHUB_WORKSPACE}/package"  
-          for d in *; do
-            cd "$d"
-            tar -czvf "${GITHUB_WORKSPACE}/package/${d}.tar.gz" *
-            cd -
-          done
-        working-directory: artifacts
-      - name: Create release
-        run: |
-          set -x
-          build_type="$(basename $(dirname ${GITHUB_REF}))"
-          build_version="$(basename ${GITHUB_REF})"
-          tag="$build_type/$build_version"
-          label="$tag"
-          flags=()
-          if [[ "$build_type" == "nightly" ]]; then
-            flags+=("-p")
-            label="$build_type/$(date +'%Y-%m-%d') ($build_version)"
-          fi
-          for asset in ${GITHUB_WORKSPACE}/package/*.tar.gz; do
-            flags+=("-a" "$asset")
-          done
-          hub release create "${flags[@]}" -m "CBC ${label}" "${tag}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  clean:
-    name: Clean Up
-    needs: [build-winpthreads, build-cbc, release]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-      - name: Remove tag so due to build failure
-        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
-        run: |
-          git config --global user.email "<>"
-          git config --global user.name "Automatic Build"
-          git push --delete origin ${GITHUB_REF}
