@@ -21,16 +21,10 @@ jobs:
           git config --global user.name "Automatic Build"
       - name: Checkout repo
         uses: actions/checkout@v2
-      - name: Tag new cbc release if necessary
+      - name: Tag nightly open-wbo build if necessary
         run: |
-          version=$(git ls-remote --tags https://github.com/coin-or/Cbc | fgrep releases | cut -d '/' -f 4 | sort -nr -t. -k1,1 -k2,2 -k3,3 | head -1)
-          echo "Pushing tag for version $version"
-          git tag -a "releases/$version" -m "Cbc version $version (stable)"
-          git push origin -f "releases/$version"
-      - name: Tag nightly cbc build if necessary
-        run: |
-          sha=$(git ls-remote https://github.com/coin-or/Cbc refs/heads/master | awk '{print $1;}')
+          sha=$(git ls-remote https://github.com/sat-group/open-wbo refs/heads/master | awk '{print $1;}')
           night=$(date +'%Y-%m-%d')          
           echo "Pushing tag for nightly $sha"
-          git tag -a "nightly/$sha" -m "Cbc nightly ($night)"
+          git tag -a "nightly/$sha" -m "Open-WBO nightly ($night)"
           git push -f origin "nightly/$sha"
