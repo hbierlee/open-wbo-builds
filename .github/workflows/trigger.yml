@@ -12,6 +12,10 @@ jobs:
     name: Trigger builds
     runs-on: ubuntu-latest
     steps:
+      - name: Setup SSH access
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Setup git access to allow triggering build workflow
         run: |
           git config --global url."git@github.com:".insteadOf "https://github.com/"
