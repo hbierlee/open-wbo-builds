@@ -1,6 +1,8 @@
 name: Build
 
 on: create
+  workflow_dispatch:
+
 
 defaults:
   run:
