@@ -26,13 +26,10 @@ jobs:
       - name: Prepare build environment
         id: prepare
         run: sudo apt-get update
-        env:
-          OPEN_WBO_PLATFORM: ${{ matrix.platform }}
-        working-directory: scripts
       - name: Fetch Open-WBO
         run: git clone git@github.com:sat-group/open-wbo.git
       - name: Build Open-WBO
-        run: make rs
+        run: make r
       - name: Add licenses
         run: cp ./LICENSE ./dist/open-wbo-*
       - name: Upload build artifact
