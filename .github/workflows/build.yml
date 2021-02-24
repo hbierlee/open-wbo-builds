@@ -34,6 +34,7 @@ jobs:
         run: sudo apt-get update
       - name: Fetch Open-WBO
         run: | 
+          mkdir ${{ github.workspace }}/dist
           cd ${{ github.workspace }}/dist
           git clone git@github.com:sat-group/open-wbo.git
       - name: Build Open-WBO
