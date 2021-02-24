@@ -71,15 +71,9 @@ jobs:
       - name: Create release
         run: |
           set -x
-          build_type="$(basename $(dirname ${GITHUB_REF}))"
-          build_version="$(basename ${GITHUB_REF})"
-          tag="$build_type/$build_version"
-          label="$tag"
-          flags=()
-          if [[ "$build_type" == "nightly" ]]; then
-            flags+=("-p")
-            label="$build_type/$(date +'%Y-%m-%d') ($build_version)"
-          fi
+          tag=$(git describe --abbrev=0)
+          flags=("-p")
+          label="nightly/$(date +'%Y-%m-%d')"
           for asset in ${GITHUB_WORKSPACE}/package/*.tar.gz; do
             flags+=("-a" "$asset")
           done
