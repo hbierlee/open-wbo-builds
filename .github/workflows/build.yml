@@ -44,6 +44,46 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v2
         with:
-          name: open-wbo_release
+          name: open-wbo
           path: dist/*
+
+  release:
+    name: Create release
+    needs: [build-open-wbo]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: open-wbo
+          path: artifacts
+      - name: Package artifacts
+        run: |
+          mkdir -p "${GITHUB_WORKSPACE}/package"  
+          for d in *; do
+            cd "$d"
+            tar -czvf "${GITHUB_WORKSPACE}/package/${d}.tar.gz" *
+            cd -
+          done
+        working-directory: artifacts
+      - name: Create release
+        run: |
+          set -x
+          build_type="$(basename $(dirname ${GITHUB_REF}))"
+          build_version="$(basename ${GITHUB_REF})"
+          tag="$build_type/$build_version"
+          label="$tag"
+          flags=()
+          if [[ "$build_type" == "nightly" ]]; then
+            flags+=("-p")
+            label="$build_type/$(date +'%Y-%m-%d') ($build_version)"
+          fi
+          for asset in ${GITHUB_WORKSPACE}/package/*.tar.gz; do
+            flags+=("-a" "$asset")
+          done
+          hub release create "${flags[@]}" -m "Open-WBO ${label}" "${tag}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
