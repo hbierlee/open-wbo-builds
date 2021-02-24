@@ -41,11 +41,9 @@ jobs:
         run: |
           cd dist/open-wbo
           make r
-      # - name: Add licenses
-      #   run: cp ./LICENSE ./dist/open-wbo-*
       - name: Upload build artifact
         uses: actions/upload-artifact@v2
         with:
           name: open-wbo_release
-          path: ${{ github.workspace }}/dist/*
+          path: dist/*
 
