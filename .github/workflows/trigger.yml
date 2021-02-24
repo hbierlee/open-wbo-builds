@@ -26,7 +26,7 @@ jobs:
       - name: Tag nightly open-wbo build if necessary
         run: |
           sha=$(git ls-remote https://github.com/sat-group/open-wbo refs/heads/master | awk '{print $1;}')
-          night=$(date +'%Y-%m-%d')          
+          night=$(date +'%Y-%m-%d')
           echo "Pushing tag for nightly $sha"
           git tag -a "nightly/$sha" -m "Open-WBO nightly ($night)"
           git push -f origin "nightly/$sha"
